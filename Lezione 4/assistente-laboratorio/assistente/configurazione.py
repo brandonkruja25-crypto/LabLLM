@@ -2,7 +2,8 @@
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+from assistente.strumenti import valida_fuso
 
 LIVELLI_LOG = ("DEBUG", "INFO", "WARNING", "ERROR")
 
@@ -33,8 +34,8 @@ def carica_configurazione(ambiente: Mapping[str, str]) -> Configurazione:
 
     fuso = (ambiente.get("FUSO_ORARIO_PREDEFINITO") or "Europe/Rome").strip()
     try:
-        ZoneInfo(fuso)
-    except (ZoneInfoNotFoundError, ValueError):
+        valida_fuso(fuso)
+    except ValueError:
         raise ErroreConfigurazione(
             f"FUSO_ORARIO_PREDEFINITO non valido: {fuso!r}. Usa un nome IANA, per esempio Europe/Rome."
         ) from None
