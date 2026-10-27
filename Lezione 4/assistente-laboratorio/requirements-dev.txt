@@ -1,0 +1,3 @@
+-r requirements.txt
+# Test automatici e prove reali con marcatori
+pytest==9.1.1

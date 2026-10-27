@@ -1,0 +1,12 @@
+# Grafo esplicito con stato, nodi e instradamento
+langgraph==1.2.18
+# Messaggi, strumenti e interfaccia Runnable usati dal grafo
+langchain-core==1.7.0
+# ChatOpenAI: client compatibile con l'API OpenAI esposta da LM Studio
+langchain-openai==1.7.3
+# SDK OpenAI usato da langchain-openai; fissato per riconoscere i suoi errori
+openai==3.39.0
+# Carica il file .env nell'esecuzione locale senza Docker
+python-dotenv==1.2.4
+# Database dei fusi IANA, assente nell'immagine python:3.13-slim
+tzdata==2026.5
