@@ -41,7 +41,7 @@ class Conversazione:
         except openai.APIError as errore:
             log.error("Chiamata al modello fallita: %s", errore)
             raise ErroreModello(
-                f"Impossibile contattare il modello su {self.base_url}: {errore}. "
+                f"Impossibile contattare il modello su {self.base_url}: {str(errore).rstrip('.')}. "
                 "Controlla che LM Studio sia avviato, che il server sia attivo "
                 "e che LMSTUDIO_BASE_URL sia corretto."
             ) from errore

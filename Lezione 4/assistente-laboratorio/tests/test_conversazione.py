@@ -11,7 +11,7 @@ BASE_URL = "http://localhost:1234/v1"
 
 class ConnessioneRifiutata(openai.APIConnectionError):
     def __init__(self):
-        Exception.__init__(self, "Connection refused")
+        Exception.__init__(self, "Connection error.")
 
 
 class ModelloNonCaricato(openai.APIStatusError):
@@ -54,6 +54,7 @@ def test_errore_del_modello_ripristina_la_cronologia(errore):
         conv.invia("ci sei?")
     assert BASE_URL in str(eccezione.value)
     assert "LM Studio sia avviato" in str(eccezione.value)
+    assert ".." not in str(eccezione.value)
     assert conv.cronologia == prima
 
     assert conv.invia("ci sei?").risposta == "Eccomi."
