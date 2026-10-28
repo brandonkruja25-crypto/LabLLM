@@ -1,6 +1,6 @@
 # Assistente del laboratorio — requisiti (Lezione 4)
 
-Data: 2026-10-27 · Stato: in attesa di approvazione
+Data: 2026-10-27 · Stato: approvati · Aggiornati: 2026-10-28 (RF-06)
 
 Elenco verificabile dei requisiti. Il comportamento dettagliato è nella specifica
 [`2026-10-27-assistente-laboratorio-design.md`](2026-10-27-assistente-laboratorio-design.md);
@@ -18,7 +18,7 @@ Tipo di verifica: **A** = test automatico senza modello · **L** = prova reale c
 | RF-03 | Primo incremento: grafo senza LLM che restituisce la risposta fissa «Il grafo è in esecuzione.». | slide 5, 23 | A |
 | RF-04 | Il nodo `llm` interroga il modello di LM Studio tramite l'API compatibile con OpenAI, con indirizzo e modello da variabili d'ambiente. | slide 7, CLAUDE.md | A, L |
 | RF-05 | Cronologia di sessione: dopo due turni contiene le 2 domande e le 2 risposte, senza duplicati; persa alla chiusura. | slide 8, 22 | A, L |
-| RF-06 | Strumento `ora_corrente(fuso_orario?)`: data e ora ISO 8601 con offset e nome del fuso IANA; default da `FUSO_ORARIO_PREDEFINITO`; ora calcolata da UTC, indipendente dal fuso del container. | slide 10-11 | A |
+| RF-06 | Strumento `ora_corrente(fuso_orario?)`: data e ora ISO 8601 con offset, nome del fuso IANA e giorno della settimana in italiano (calcolato nel fuso richiesto); default da `FUSO_ORARIO_PREDEFINITO`; ora calcolata da UTC, indipendente dal fuso del container. | slide 10-11 | A |
 | RF-07 | Fuso non valido: nessuna eccezione, errore testuale restituito al modello con indicazione del formato IANA. | slide 11 | A |
 | RF-08 | Ciclo con strumenti: se la risposta contiene richieste di tool, il nodo `strumenti` esegue la funzione reale, aggiunge un `ToolMessage` con il `tool_call_id` corretto e torna a `llm`; altrimenti END. | slide 12 | A, L |
 | RF-09 | Limite di passaggi (`MAX_PASSAGGI`, default 6): al raggiungimento il turno termina con un messaggio esplicito, senza risposta inventata. | slide 12, 22 | A |

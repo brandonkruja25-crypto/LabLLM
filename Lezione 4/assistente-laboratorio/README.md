@@ -83,15 +83,15 @@ modello il risultato.
 |---|---|
 | Parametro | `fuso_orario`, facoltativo: nome di fuso IANA (`Europe/Rome`, `Asia/Tokyo`, `America/New_York`, `UTC`) |
 | Senza parametro | si usa `FUSO_ORARIO_PREDEFINITO` |
-| Risultato | `AAAA-MM-GGTHH:MM:SS±HH:MM (Nome/IANA)`, calcolato da UTC: il fuso del computer o del container non conta |
+| Risultato | `AAAA-MM-GGTHH:MM:SS±HH:MM (Nome/IANA), giorno`, calcolato da UTC: il fuso del computer o del container non conta. Il giorno della settimana è quello del fuso richiesto, in italiano |
 | Fuso non valido | testo che inizia con `Errore:` restituito al modello, nessuna eccezione |
 
 Ogni chiamata compare nella chat prima della risposta:
 
 ```
 Tu> Che ore sono adesso a Tokyo?
-[strumento] ora_corrente(fuso_orario="Asia/Tokyo") → 2026-10-28T19:20:21+09:00 (Asia/Tokyo)
-Assistente> Adesso sono le 19:20:21 del 28 ottobre 2026 a Tokyo.
+[strumento] ora_corrente(fuso_orario="Asia/Tokyo") → 2026-10-28T20:08:51+09:00 (Asia/Tokyo), mercoledì
+Assistente> Adesso sono le 20:08:51 di mercoledì 28 ottobre 2026 a Tokyo.
 ```
 
 Il grafo è `START → llm → (strumenti → llm)* → END`. Il ciclo si ferma dopo `MAX_PASSAGGI` chiamate
@@ -107,8 +107,8 @@ risposta deve contenere l'ora restituita e una domanda ordinaria non deve usare 
 Con `google/gemma-4-e2b` il modello a volte ometteva `fuso_orario` (5 casi su 17). Dopo aver
 aggiunto la descrizione del parametro e un'indicazione nel prompt di sistema, la prova è passata
 12 volte su 12. Il modello resta non deterministico: un errore occasionale va segnalato, non
-nascosto. Il risultato non comprende il giorno della settimana, quindi il modello può sbagliarlo
-se lo aggiunge.
+nascosto. Il risultato comprende anche il giorno della settimana: prima il modello lo calcolava da
+sé e a volte sbagliava (ad esempio «lunedì» per mercoledì 28 ottobre 2026).
 
 ## Docker Compose
 
@@ -154,7 +154,8 @@ python -m pytest -m docker -v
 
 | Sintomo | Cause probabili | Cosa controllare |
 |---|---|---|
-| Il container termina subito | `.env` assente, oppure configurazione non valida (il messaggio nomina la variabile) | `Copy-Item .env.example .env`; leggere il messaggio `Errore di configurazione` |
+| Compose non parte: `env file ... .env not found` | Manca il file `.env` | `Copy-Item .env.example .env` |
+| Il container termina subito con `Errore di configurazione: ...` | Una variabile mancante o non valida, nominata nel messaggio | Correggere quella variabile nel `.env` |
 | Avviso «il server ... non risponde» e `Errore: Impossibile contattare il modello` | LM Studio spento, server API non avviato, o server in ascolto solo sull'interfaccia locale | In LM Studio avviare il server; se il container non lo raggiunge, attivare l'opzione per servire sulla rete locale e controllare il firewall di Windows per la porta 1234 |
 | Il programma termina con «non è tra i modelli» | `LMSTUDIO_MODEL` diverso dagli identificativi del server | Usare un id dall'elenco mostrato, o da `Invoke-RestMethod http://localhost:1234/v1/models` |
 | La risposta sull'ora non ha la riga `[strumento]` | Il modello ha risposto senza chiedere lo strumento | Avviare con `LIVELLO_LOG=INFO` e leggere instradamento e richieste; riformulare la domanda; segnalare il caso come limite del modello |

@@ -6,17 +6,17 @@ from assistente.strumenti import crea_strumento_orologio, ora_corrente_testo, va
 
 ISTANTE_INVERNO = datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
 ISTANTE_ESTATE = datetime(2026, 7, 15, 12, 0, 0, tzinfo=timezone.utc)
-TOKYO_INVERNO = "2026-01-15T21:00:00+09:00 (Asia/Tokyo)"
-ROMA_INVERNO = "2026-01-15T13:00:00+01:00 (Europe/Rome)"
+TOKYO_INVERNO = "2026-01-15T21:00:00+09:00 (Asia/Tokyo), giovedì"
+ROMA_INVERNO = "2026-01-15T13:00:00+01:00 (Europe/Rome), giovedì"
 
 
 @pytest.mark.parametrize(
     ("fuso", "istante", "atteso"),
     [
         ("Europe/Rome", ISTANTE_INVERNO, ROMA_INVERNO),
-        ("Europe/Rome", ISTANTE_ESTATE, "2026-07-15T14:00:00+02:00 (Europe/Rome)"),
+        ("Europe/Rome", ISTANTE_ESTATE, "2026-07-15T14:00:00+02:00 (Europe/Rome), mercoledì"),
         ("Asia/Tokyo", ISTANTE_INVERNO, TOKYO_INVERNO),
-        ("UTC", ISTANTE_INVERNO, "2026-01-15T12:00:00+00:00 (UTC)"),
+        ("UTC", ISTANTE_INVERNO, "2026-01-15T12:00:00+00:00 (UTC), giovedì"),
         (None, ISTANTE_INVERNO, ROMA_INVERNO),
         (" Asia/Tokyo ", ISTANTE_INVERNO, TOKYO_INVERNO),
     ],
@@ -57,3 +57,9 @@ def test_schema_inviato_al_modello_descrive_il_parametro():
     assert "Asia/Tokyo" in parametro["description"]
     assert "città" in parametro["description"]
     assert schema["function"]["parameters"].get("required", []) == []
+
+
+def test_giorno_della_settimana_calcolato_nel_fuso_richiesto():
+    sera_utc = datetime(2026, 1, 15, 20, 0, 0, tzinfo=timezone.utc)
+    assert ora_corrente_testo("UTC", "Europe/Rome", sera_utc) == "2026-01-15T20:00:00+00:00 (UTC), giovedì"
+    assert ora_corrente_testo("Asia/Tokyo", "Europe/Rome", sera_utc) == "2026-01-16T05:00:00+09:00 (Asia/Tokyo), venerdì"

@@ -1,6 +1,6 @@
 # Assistente del laboratorio — specifica (Lezione 4)
 
-Data: 2026-10-27 · Stato: in attesa di approvazione
+Data: 2026-10-27 · Stato: approvata · Aggiornata: 2026-10-28 (giorno della settimana nel risultato dello strumento)
 
 ## 1. Scopo e motivazione
 
@@ -62,8 +62,8 @@ leggibile e punti di estensione chiari più delle funzionalità aggiuntive.
 Assistente del laboratorio — modello google/gemma-4-e2b su http://localhost:1234/v1
 Scrivi «esci» per terminare.
 Tu> che ore sono a Tokyo?
-[strumento] ora_corrente(fuso_orario="Asia/Tokyo") → 2026-10-27T23:04:05+09:00 (Asia/Tokyo)
-Assistente> A Tokyo sono le 23:04 del 27 ottobre 2026.
+[strumento] ora_corrente(fuso_orario="Asia/Tokyo") → 2026-10-27T23:04:05+09:00 (Asia/Tokyo), martedì
+Assistente> A Tokyo sono le 23:04 di martedì 27 ottobre 2026.
 Tu> esci
 ```
 
@@ -104,9 +104,9 @@ START → llm ──(il messaggio contiene tool_calls?)──sì──→ strume
 | Parte | Decisione |
 |---|---|
 | Nome | `ora_corrente` |
-| Descrizione | Restituisce data e ora attuali. Da usare ogni volta che servono data o ora correnti, senza inventarle. Il parametro è un nome di fuso IANA, con esempi espliciti: `Europe/Rome`, `Asia/Tokyo`, `America/New_York`, `UTC`. |
+| Descrizione | Restituisce data, ora e giorno della settimana attuali. Da usare ogni volta che servono data, ora o giorno correnti, senza inventarli. Il parametro è un nome di fuso IANA, con esempi espliciti: `Europe/Rome`, `Asia/Tokyo`, `America/New_York`, `UTC`. |
 | Parametri | `fuso_orario` (stringa, facoltativo). Se assente: valore di `FUSO_ORARIO_PREDEFINITO`. |
-| Risultato | ISO 8601 al secondo con offset, seguito dal nome del fuso: `2026-10-27T15:04:05+01:00 (Europe/Rome)`. Ora legale gestita da `zoneinfo`. |
+| Risultato | ISO 8601 al secondo con offset, seguito dal nome del fuso e dal giorno della settimana in italiano: `2026-10-27T15:04:05+01:00 (Europe/Rome), martedì`. Ora legale gestita da `zoneinfo`; il giorno è quello della data nel fuso richiesto e il suo nome viene da una tabella fissa, non dal locale del sistema. |
 | Errori | Fuso non riconosciuto (es. `Tokyo`, `UTC+2`, testo vuoto o casuale): nessuna eccezione; risultato di errore testuale restituito al modello, con il valore ricevuto e l'indicazione di usare un nome IANA (con esempio). |
 
 - L'istante si ottiene dall'orologio di sistema in UTC e si converte nel fuso richiesto; il fuso
@@ -219,6 +219,8 @@ Decise con l'utente:
 - chiamate allo strumento visibili sia in chat sia nei log;
 - log silenziosi di default (`WARNING`), da alzare quando serve;
 - cronologia persa alla chiusura;
+- giorno della settimana nel risultato dello strumento (2026-10-28): senza, il modello lo
+  calcolava da sé e a volte sbagliava (osservato «lunedì 28 ottobre» invece di mercoledì);
 - repository in `Desktop\LLM`, progetto in `Lezione 4/assistente-laboratorio/`.
 
 Scelte mie (da confermare leggendo):

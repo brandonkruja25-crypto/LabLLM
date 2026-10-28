@@ -6,7 +6,7 @@ from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableLambda
 
 ISTANTE_INVERNO = datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
-TOKYO_INVERNO = "2026-01-15T21:00:00+09:00 (Asia/Tokyo)"
+TOKYO_INVERNO = "2026-01-15T21:00:00+09:00 (Asia/Tokyo), giovedì"
 
 
 def modello_a_copione(*passi):

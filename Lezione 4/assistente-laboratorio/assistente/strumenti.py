@@ -7,6 +7,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from langchain_core.tools import BaseTool, StructuredTool
 
 ESEMPI_FUSO = "Europe/Rome, Asia/Tokyo, America/New_York, UTC"
+# Nomi italiani fissi: strftime("%A") dipenderebbe dal locale del sistema o del container.
+GIORNI = ("lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica")
 
 
 def valida_fuso(nome: str) -> ZoneInfo:
@@ -30,7 +32,8 @@ def ora_corrente_testo(fuso_orario: str | None, fuso_predefinito: str, adesso_ut
             f"Errore: fuso orario non riconosciuto: {richiesto!r}. "
             f"Usa un nome di fuso IANA, per esempio Asia/Tokyo ({ESEMPI_FUSO})."
         )
-    return f"{adesso_utc.astimezone(zona).isoformat(timespec='seconds')} ({zona.key})"
+    locale = adesso_utc.astimezone(zona)
+    return f"{locale.isoformat(timespec='seconds')} ({zona.key}), {GIORNI[locale.weekday()]}"
 
 
 def _adesso_utc() -> datetime:
@@ -39,7 +42,7 @@ def _adesso_utc() -> datetime:
 
 def crea_strumento_orologio(fuso_predefinito: str, orologio: Callable[[], datetime] = _adesso_utc) -> BaseTool:
     def ora_corrente(fuso_orario: str | None = None) -> str:
-        """Data e ora attuali.
+        """Data, ora e giorno della settimana attuali.
 
         Args:
             fuso_orario: nome di fuso IANA del luogo di cui si chiede l'ora, per esempio
@@ -53,8 +56,9 @@ def crea_strumento_orologio(fuso_predefinito: str, orologio: Callable[[], dateti
         name="ora_corrente",
         parse_docstring=True,
         description=(
-            "Restituisce la data e l'ora attuali. Usala ogni volta che servono la data o l'ora "
-            "correnti, senza inventarle. Il parametro fuso_orario è un nome di fuso IANA, per "
+            "Restituisce la data, l'ora e il giorno della settimana attuali. Usala ogni volta che "
+            "servono data, ora o giorno correnti, senza inventarli. Il parametro fuso_orario è un "
+            "nome di fuso IANA, per "
             f"esempio {ESEMPI_FUSO}. Se lo ometti viene usato il fuso predefinito ({fuso_predefinito})."
         ),
     )
