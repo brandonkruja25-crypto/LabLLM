@@ -44,3 +44,9 @@ def test_livello_log_non_valido():
 def test_fuso_predefinito_non_valido():
     with pytest.raises(ErroreConfigurazione, match="FUSO_ORARIO_PREDEFINITO"):
         carica_configurazione({**MINIMO, "FUSO_ORARIO_PREDEFINITO": "Roma"})
+
+
+@pytest.mark.parametrize("valore", ["localhost:1234/v1", "http://local host:1234/v1", "ftp://localhost/v1", "http://"])
+def test_base_url_non_valido(valore):
+    with pytest.raises(ErroreConfigurazione, match="LMSTUDIO_BASE_URL"):
+        carica_configurazione({**MINIMO, "LMSTUDIO_BASE_URL": valore})

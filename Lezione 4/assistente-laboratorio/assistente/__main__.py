@@ -16,6 +16,16 @@ from assistente.terminale import esegui_chat
 
 
 def main(ambiente: Mapping[str, str] | None = None) -> int:
+    # Con l'output rediretto su Windows la codifica può non avere «→» o «—»: meglio un «?» che un traceback.
+    sys.stdout.reconfigure(errors="replace")
+    try:
+        return _avvia(ambiente)
+    except KeyboardInterrupt:
+        print(file=sys.stderr)
+        return 130
+
+
+def _avvia(ambiente: Mapping[str, str] | None) -> int:
     if ambiente is None:
         load_dotenv()
         ambiente = os.environ

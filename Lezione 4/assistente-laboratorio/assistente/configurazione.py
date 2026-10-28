@@ -2,6 +2,7 @@
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from urllib.parse import urlparse
 
 from assistente.strumenti import valida_fuso
 
@@ -30,6 +31,11 @@ def _obbligatoria(ambiente: Mapping[str, str], nome: str) -> str:
 
 def carica_configurazione(ambiente: Mapping[str, str]) -> Configurazione:
     base_url = _obbligatoria(ambiente, "LMSTUDIO_BASE_URL")
+    indirizzo = urlparse(base_url)
+    if indirizzo.scheme not in ("http", "https") or not indirizzo.netloc or any(c.isspace() for c in base_url):
+        raise ErroreConfigurazione(
+            f"LMSTUDIO_BASE_URL non valido: {base_url!r}. Serve un indirizzo http, per esempio http://localhost:1234/v1."
+        )
     modello = _obbligatoria(ambiente, "LMSTUDIO_MODEL")
 
     fuso = (ambiente.get("FUSO_ORARIO_PREDEFINITO") or "Europe/Rome").strip()
