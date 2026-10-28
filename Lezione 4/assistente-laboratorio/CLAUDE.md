@@ -1,8 +1,25 @@
 # Assistente del laboratorio
 
 Progetto del corso «Deep Learning e LLM: costruire chatbot e agenti».
-La cartella del progetto è `assistente-laboratorio/`; all'inizio contiene soltanto questo file.
-Struttura, dipendenze e comandi verranno definiti con la specifica e il piano.
+La cartella del progetto è `assistente-laboratorio/`. Specifica, requisiti e piano sono in
+`docs/superpowers/`; configurazione, avvio e diagnosi nel README.
+
+## Struttura
+- `assistente/configurazione.py`: variabili d'ambiente validate all'avvio.
+- `assistente/strumenti.py`: strumento `ora_corrente`.
+- `assistente/modello.py`: client di LM Studio e controllo di `GET /v1/models`.
+- `assistente/grafo.py`: stato, nodi `llm` e `strumenti`, funzione `instrada`, limite di passaggi.
+- `assistente/conversazione.py`: cronologia di sessione e rollback del turno.
+- `assistente/terminale.py`, `assistente/__main__.py`: chat da terminale e avvio (`python -m assistente`).
+- `tests/`: test automatici senza modello (`tests/finti.py` contiene i modelli finti);
+  `tests/reali/`: prove reali con LM Studio e Docker.
+- `Dockerfile`, `compose.yaml`, `.dockerignore`: avvio con Docker Compose.
+
+## Comandi (PowerShell, con `.\.venv\Scripts\Activate.ps1`)
+- `python -m pytest`: test automatici; le prove reali sono escluse di default.
+- `python -m pytest -m lmstudio -v`: prove reali con LM Studio (richiede `.env` e il server attivo).
+- `docker compose build` poi `python -m pytest -m docker -v`: prova reale dal container. Ricostruire
+  l'immagine dopo ogni modifica al codice: `docker compose run` non lo fa da solo.
 
 ## Obiettivo
 Un'applicazione da terminale in Python che conversa con un modello locale e:
