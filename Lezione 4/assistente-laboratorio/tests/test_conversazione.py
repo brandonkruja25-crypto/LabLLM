@@ -1,10 +1,11 @@
 import openai
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
-from langchain_core.runnables import RunnableLambda
 
-from assistente.conversazione import Conversazione, ErroreModello
+from assistente.conversazione import ChiamataStrumento, Conversazione, ErroreModello
 from assistente.grafo import crea_grafo
+from assistente.strumenti import crea_strumento_orologio
+from tests.finti import ISTANTE_INVERNO, TOKYO_INVERNO, modello_a_copione, richiesta_strumento
 
 BASE_URL = "http://localhost:1234/v1"
 
@@ -19,21 +20,11 @@ class ModelloNonCaricato(openai.APIStatusError):
         Exception.__init__(self, "Error code: 404 - model not loaded")
 
 
-def modello_a_copione(*passi):
-    """Modello finto: ogni passo è un AIMessage da restituire o un'eccezione da sollevare."""
-    coda = list(passi)
-
-    def rispondi(messaggi):
-        passo = coda.pop(0)
-        if isinstance(passo, Exception):
-            raise passo
-        return passo
-
-    return RunnableLambda(rispondi)
+STRUMENTI = [crea_strumento_orologio("Europe/Rome", orologio=lambda: ISTANTE_INVERNO)]
 
 
 def conversazione(*passi):
-    return Conversazione(crea_grafo(modello_a_copione(*passi)), BASE_URL)
+    return Conversazione(crea_grafo(modello_a_copione(*passi), STRUMENTI), BASE_URL)
 
 
 def test_due_turni_conservano_la_cronologia():
@@ -59,3 +50,25 @@ def test_errore_del_modello_ripristina_la_cronologia(errore):
 
     assert conv.invia("ci sei?").risposta == "Eccomi."
     assert len(conv.cronologia) == 4
+
+
+def test_esito_con_chiamate():
+    conv = conversazione(richiesta_strumento(), AIMessage("A Tokyo sono le 21:00."))
+    esito = conv.invia("Che ore sono a Tokyo?")
+    assert esito.chiamate == [ChiamataStrumento("ora_corrente", {"fuso_orario": "Asia/Tokyo"}, TOKYO_INVERNO)]
+    assert esito.risposta == "A Tokyo sono le 21:00."
+    assert not esito.limite_raggiunto
+
+
+def test_limite_ripristina_la_cronologia():
+    passi = [richiesta_strumento(id_chiamata=f"call_{n}") for n in range(2)] + [AIMessage("Ciao!")]
+    modello = modello_a_copione(*passi)
+    conv = Conversazione(crea_grafo(modello, STRUMENTI, max_passaggi=2), BASE_URL)
+
+    esito = conv.invia("Che ore sono a Tokyo?")
+    assert esito.limite_raggiunto and esito.risposta is None
+    assert len(esito.chiamate) == 1
+    assert conv.cronologia == []
+
+    assert conv.invia("ciao").risposta == "Ciao!"
+    assert [m.content for m in conv.cronologia] == ["ciao", "Ciao!"]

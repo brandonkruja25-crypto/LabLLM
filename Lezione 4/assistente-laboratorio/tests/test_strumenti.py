@@ -47,3 +47,13 @@ def test_strumento_langchain():
         assert testo in strumento.description
     assert strumento.invoke({"fuso_orario": "Asia/Tokyo"}) == TOKYO_INVERNO
     assert strumento.invoke({}) == ROMA_INVERNO
+
+
+def test_schema_inviato_al_modello_descrive_il_parametro():
+    from langchain_core.utils.function_calling import convert_to_openai_tool
+
+    schema = convert_to_openai_tool(crea_strumento_orologio("Europe/Rome"))
+    parametro = schema["function"]["parameters"]["properties"]["fuso_orario"]
+    assert "Asia/Tokyo" in parametro["description"]
+    assert "città" in parametro["description"]
+    assert schema["function"]["parameters"].get("required", []) == []

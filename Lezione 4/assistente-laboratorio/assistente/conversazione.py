@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass, field
 
 import openai
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langgraph.graph.state import CompiledStateGraph
 
 log = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class Conversazione:
         self.cronologia: list[BaseMessage] = []
 
     def invia(self, testo: str) -> EsitoTurno:
-        ingresso = {"messages": [*self.cronologia, HumanMessage(testo)]}
+        ingresso = {"messages": [*self.cronologia, HumanMessage(testo)], "passaggi": 0, "limite_raggiunto": False}
         try:
             risultato = self.grafo.invoke(ingresso)
         except openai.APIError as errore:
@@ -47,7 +47,23 @@ class Conversazione:
             ) from errore
 
         messaggi = risultato["messages"]
+        chiamate = _chiamate_del_turno(messaggi[len(ingresso["messages"]):])
+        if risultato.get("limite_raggiunto"):
+            return EsitoTurno(None, chiamate, True)
+
         self.cronologia = list(messaggi)
         ultimo = messaggi[-1]
         risposta = ultimo.text if isinstance(ultimo, AIMessage) else None
-        return EsitoTurno(risposta)
+        return EsitoTurno(risposta, chiamate)
+
+
+def _chiamate_del_turno(nuovi: list[BaseMessage]) -> list[ChiamataStrumento]:
+    """Accoppia ogni richiesta di tool del turno al ToolMessage con lo stesso tool_call_id."""
+    risultati = {m.tool_call_id: m.text for m in nuovi if isinstance(m, ToolMessage)}
+    return [
+        ChiamataStrumento(richiesta["name"], richiesta["args"], risultati[richiesta["id"]])
+        for m in nuovi
+        if isinstance(m, AIMessage)
+        for richiesta in m.tool_calls
+        if richiesta["id"] in risultati
+    ]

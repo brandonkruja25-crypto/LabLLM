@@ -39,11 +39,19 @@ def _adesso_utc() -> datetime:
 
 def crea_strumento_orologio(fuso_predefinito: str, orologio: Callable[[], datetime] = _adesso_utc) -> BaseTool:
     def ora_corrente(fuso_orario: str | None = None) -> str:
+        """Data e ora attuali.
+
+        Args:
+            fuso_orario: nome di fuso IANA del luogo di cui si chiede l'ora, per esempio
+                Asia/Tokyo per Tokyo o America/New_York per New York. Indicalo sempre quando la
+                domanda nomina una città o un paese; omettilo solo per l'ora locale.
+        """
         return ora_corrente_testo(fuso_orario, fuso_predefinito, orologio())
 
     return StructuredTool.from_function(
         ora_corrente,
         name="ora_corrente",
+        parse_docstring=True,
         description=(
             "Restituisce la data e l'ora attuali. Usala ogni volta che servono la data o l'ora "
             "correnti, senza inventarle. Il parametro fuso_orario è un nome di fuso IANA, per "

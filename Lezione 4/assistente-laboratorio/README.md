@@ -74,6 +74,42 @@ python -m assistente
 
 A livello `INFO` i log compaiono nello stesso terminale della chat.
 
+## Strumento orologio
+
+Il modello può chiedere lo strumento `ora_corrente`. Il programma lo esegue davvero e restituisce al
+modello il risultato.
+
+| Parte | Contratto |
+|---|---|
+| Parametro | `fuso_orario`, facoltativo: nome di fuso IANA (`Europe/Rome`, `Asia/Tokyo`, `America/New_York`, `UTC`) |
+| Senza parametro | si usa `FUSO_ORARIO_PREDEFINITO` |
+| Risultato | `AAAA-MM-GGTHH:MM:SS±HH:MM (Nome/IANA)`, calcolato da UTC: il fuso del computer o del container non conta |
+| Fuso non valido | testo che inizia con `Errore:` restituito al modello, nessuna eccezione |
+
+Ogni chiamata compare nella chat prima della risposta:
+
+```
+Tu> Che ore sono adesso a Tokyo?
+[strumento] ora_corrente(fuso_orario="Asia/Tokyo") → 2026-10-28T19:20:21+09:00 (Asia/Tokyo)
+Assistente> Adesso sono le 19:20:21 del 28 ottobre 2026 a Tokyo.
+```
+
+Il grafo è `START → llm → (strumenti → llm)* → END`. Il ciclo si ferma dopo `MAX_PASSAGGI` chiamate
+al modello. In quel caso la chat mostra `Limite di passaggi raggiunto` invece di una risposta, e la
+cronologia torna com'era prima della domanda.
+
+Con `$env:LIVELLO_LOG="INFO"` i log mostrano, per ogni turno, la chiamata al modello, la decisione
+di instradamento, la richiesta dello strumento con gli argomenti e il risultato.
+
+La prova reale `-m lmstudio` dimostra che il modello locale chiede davvero lo strumento: per una
+domanda sull'ora a Tokyo serve almeno una chiamata con `fuso_orario` uguale a `Asia/Tokyo`, la
+risposta deve contenere l'ora restituita e una domanda ordinaria non deve usare lo strumento.
+Con `google/gemma-4-e2b` il modello a volte ometteva `fuso_orario` (5 casi su 17). Dopo aver
+aggiunto la descrizione del parametro e un'indicazione nel prompt di sistema, la prova è passata
+12 volte su 12. Il modello resta non deterministico: un errore occasionale va segnalato, non
+nascosto. Il risultato non comprende il giorno della settimana, quindi il modello può sbagliarlo
+se lo aggiunge.
+
 ## Test
 
 ```powershell

@@ -11,6 +11,7 @@ from assistente.configurazione import ErroreConfigurazione, carica_configurazion
 from assistente.conversazione import Conversazione
 from assistente.grafo import crea_grafo
 from assistente.modello import crea_modello, verifica_modello
+from assistente.strumenti import crea_strumento_orologio
 from assistente.terminale import esegui_chat
 
 
@@ -32,8 +33,8 @@ def main(ambiente: Mapping[str, str] | None = None) -> int:
     if avviso:
         print(avviso, file=sys.stderr)
 
-    modello = crea_modello(config)
-    grafo = crea_grafo(modello, max_passaggi=config.max_passaggi)
+    strumenti = [crea_strumento_orologio(config.fuso_predefinito)]
+    grafo = crea_grafo(crea_modello(config, strumenti), strumenti, config.max_passaggi)
     print(f"Assistente del laboratorio — modello {config.modello} su {config.base_url}")
     print("Scrivi «esci» per terminare.")
     esegui_chat(Conversazione(grafo, config.base_url))
