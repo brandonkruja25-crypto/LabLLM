@@ -110,6 +110,58 @@ aggiunto la descrizione del parametro e un'indicazione nel prompt di sistema, la
 nascosto. Il risultato non comprende il giorno della settimana, quindi il modello può sbagliarlo
 se lo aggiunge.
 
+## Docker Compose
+
+Nel container gira solo l'applicazione. LM Studio resta sull'host e il container lo raggiunge su
+`http://host.docker.internal:1234/v1`: `compose.yaml` imposta questo indirizzo, che prevale su
+quello del `.env`. Le altre variabili arrivano dal `.env`. Non viene pubblicata nessuna porta.
+
+```powershell
+docker compose build
+docker compose run --rm --name assistente-demo assistente
+```
+
+Da un secondo terminale, mentre la chat è aperta:
+
+```powershell
+docker ps
+docker logs -f assistente-demo
+```
+
+Per vedere nei log le chiamate al modello e allo strumento, impostare `LIVELLO_LOG=INFO` nel `.env`
+oppure passarlo solo per quell'avvio:
+
+```powershell
+docker compose run --rm --name assistente-demo -e LIVELLO_LOG=INFO assistente
+```
+
+A livello `INFO` i log compaiono sia in `docker logs -f` sia nel terminale della chat, perché con
+la TTY stdout e stderr condividono lo stesso flusso. I log del container sono in UTC, ma l'ora
+restituita dallo strumento dipende solo dal fuso richiesto.
+
+Prova automatica dal container: chiede l'ora a Tokyo con input da pipe (`-T`) e controlla la
+riga `[strumento]`. Richiede Docker, il file `.env` e LM Studio attivo.
+
+```powershell
+python -m pytest -m docker -v
+```
+
+> Verifica: build, `docker ps`, `docker logs -f` e la prova `-m docker` sono stati eseguiti con
+> esito positivo. La chat interattiva con TTY (`docker compose run --rm --name assistente-demo
+> assistente` digitando a mano) è ancora da confermare in un terminale interattivo.
+
+### Diagnosi
+
+| Sintomo | Cause probabili | Cosa controllare |
+|---|---|---|
+| Il container termina subito | `.env` assente, oppure configurazione non valida (il messaggio nomina la variabile) | `Copy-Item .env.example .env`; leggere il messaggio `Errore di configurazione` |
+| Avviso «il server ... non risponde» e `Errore: Impossibile contattare il modello` | LM Studio spento, server API non avviato, o server in ascolto solo sull'interfaccia locale | In LM Studio avviare il server; se il container non lo raggiunge, attivare l'opzione per servire sulla rete locale e controllare il firewall di Windows per la porta 1234 |
+| Il programma termina con «non è tra i modelli» | `LMSTUDIO_MODEL` diverso dagli identificativi del server | Usare un id dall'elenco mostrato, o da `Invoke-RestMethod http://localhost:1234/v1/models` |
+| La risposta sull'ora non ha la riga `[strumento]` | Il modello ha risposto senza chiedere lo strumento | Avviare con `LIVELLO_LOG=INFO` e leggere instradamento e richieste; riformulare la domanda; segnalare il caso come limite del modello |
+
+In questo ambiente (Docker Desktop su Windows) il container ha raggiunto LM Studio senza
+modifiche alla rete o al firewall.
+
 ## Test
 
 ```powershell
