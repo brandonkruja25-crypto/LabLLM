@@ -72,3 +72,13 @@ def test_limite_ripristina_la_cronologia():
 
     assert conv.invia("ciao").risposta == "Ciao!"
     assert [m.content for m in conv.cronologia] == ["ciao", "Ciao!"]
+
+
+def test_chiamata_con_argomenti_non_json_mostrata():
+    from tests.finti import richiesta_non_valida
+
+    esito = conversazione(richiesta_non_valida(), AIMessage("Riprovo.")).invia("Che ore sono a Tokyo?")
+    [chiamata] = esito.chiamate
+    assert chiamata.nome == "ora_corrente"
+    assert chiamata.argomenti == {"argomenti_non_validi": "{fuso_orario: Asia/Tokyo"}
+    assert chiamata.risultato.startswith("Errore:")

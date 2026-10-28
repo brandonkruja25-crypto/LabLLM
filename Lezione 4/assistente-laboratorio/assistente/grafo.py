@@ -39,9 +39,15 @@ class StatoConversazione(TypedDict):
     limite_raggiunto: bool
 
 
-def _richieste_di_tool(stato: StatoConversazione) -> list:
-    ultimo = stato["messages"][-1]
-    return ultimo.tool_calls if isinstance(ultimo, AIMessage) else []
+def _richieste_del_messaggio(messaggio) -> list[dict]:
+    """Richieste di tool di un messaggio, comprese quelle con argomenti non in JSON valido."""
+    if not isinstance(messaggio, AIMessage):
+        return []
+    return [*messaggio.tool_calls, *messaggio.invalid_tool_calls]
+
+
+def _richieste_di_tool(stato: StatoConversazione) -> list[dict]:
+    return _richieste_del_messaggio(stato["messages"][-1])
 
 
 def instrada(stato: StatoConversazione, max_passaggi: int) -> Literal["strumenti", "fine"]:
@@ -57,6 +63,8 @@ def instrada(stato: StatoConversazione, max_passaggi: int) -> Literal["strumenti
 
 
 def _esegui_richiesta(richiesta: dict, per_nome: dict[str, BaseTool]) -> str:
+    if not isinstance(richiesta["args"], dict):
+        return f"Errore: gli argomenti di {richiesta['name']!r} non sono JSON valido: {richiesta['args']!r}."
     strumento = per_nome.get(richiesta["name"])
     if strumento is None:
         return f"Errore: strumento sconosciuto {richiesta['name']!r}. Disponibili: {', '.join(per_nome) or 'nessuno'}."
@@ -84,7 +92,7 @@ def crea_grafo(
         risposta = modello.invoke([SystemMessage(PROMPT_SISTEMA), *stato["messages"]])
         log.info("Fine chiamata al modello in %.2f s", time.perf_counter() - inizio)
         aggiornamento = {"messages": [risposta], "passaggi": passaggi}
-        if getattr(risposta, "tool_calls", None) and passaggi >= max_passaggi:
+        if _richieste_del_messaggio(risposta) and passaggi >= max_passaggi:
             log.warning("Limite di %d passaggi raggiunto: turno interrotto senza risposta finale", max_passaggi)
             aggiornamento["limite_raggiunto"] = True
         return aggiornamento

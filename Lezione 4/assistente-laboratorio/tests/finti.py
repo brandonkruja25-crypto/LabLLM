@@ -26,3 +26,13 @@ def richiesta_strumento(nome="ora_corrente", argomenti=None, id_chiamata="call_1
     if argomenti is None:
         argomenti = {"fuso_orario": "Asia/Tokyo"}
     return AIMessage("", tool_calls=[{"name": nome, "args": argomenti, "id": id_chiamata}])
+
+
+def richiesta_non_valida(id_chiamata="call_1"):
+    """Richiesta di tool con argomenti che non sono JSON valido (finisce in invalid_tool_calls)."""
+    return AIMessage(
+        "",
+        invalid_tool_calls=[
+            {"name": "ora_corrente", "args": "{fuso_orario: Asia/Tokyo", "id": id_chiamata, "error": None}
+        ],
+    )

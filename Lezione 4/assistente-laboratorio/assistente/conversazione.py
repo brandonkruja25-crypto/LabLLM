@@ -60,10 +60,15 @@ class Conversazione:
 def _chiamate_del_turno(nuovi: list[BaseMessage]) -> list[ChiamataStrumento]:
     """Accoppia ogni richiesta di tool del turno al ToolMessage con lo stesso tool_call_id."""
     risultati = {m.tool_call_id: m.text for m in nuovi if isinstance(m, ToolMessage)}
-    return [
-        ChiamataStrumento(richiesta["name"], richiesta["args"], risultati[richiesta["id"]])
-        for m in nuovi
-        if isinstance(m, AIMessage)
-        for richiesta in m.tool_calls
-        if richiesta["id"] in risultati
-    ]
+    chiamate = []
+    for m in nuovi:
+        if not isinstance(m, AIMessage):
+            continue
+        for richiesta in [*m.tool_calls, *m.invalid_tool_calls]:
+            if richiesta["id"] not in risultati:
+                continue
+            argomenti = richiesta["args"]
+            if not isinstance(argomenti, dict):
+                argomenti = {"argomenti_non_validi": argomenti}
+            chiamate.append(ChiamataStrumento(richiesta["name"], argomenti, risultati[richiesta["id"]]))
+    return chiamate

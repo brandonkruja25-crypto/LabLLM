@@ -109,3 +109,21 @@ def test_prompt_di_sistema_chiede_il_fuso_del_luogo():
 
     assert "ora_corrente" in PROMPT_SISTEMA
     assert "fuso_orario" in PROMPT_SISTEMA and "Asia/Tokyo" in PROMPT_SISTEMA
+
+
+def test_argomenti_non_json_producono_un_errore_e_il_turno_prosegue():
+    from tests.finti import richiesta_non_valida
+
+    modello = modello_a_copione(richiesta_non_valida(), AIMessage("Riprovo."))
+    risultato = crea_grafo(modello, STRUMENTI).invoke(INGRESSO)
+    [risposta_strumento] = [m for m in risultato["messages"] if isinstance(m, ToolMessage)]
+    assert risposta_strumento.tool_call_id == "call_1"
+    assert risposta_strumento.content.startswith("Errore:")
+    assert risultato["messages"][-1].content == "Riprovo."
+
+
+def test_argomenti_non_json_contano_per_il_limite():
+    from tests.finti import richiesta_non_valida
+
+    modello = RunnableLambda(lambda messaggi: richiesta_non_valida())
+    assert crea_grafo(modello, STRUMENTI, max_passaggi=2).invoke(INGRESSO)["limite_raggiunto"] is True
