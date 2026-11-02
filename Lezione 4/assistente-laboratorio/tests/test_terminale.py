@@ -92,9 +92,9 @@ def test_chiamate_stampate_prima_della_risposta():
 def test_bom_iniziale_ignorato():
     """PowerShell, passando l'input con una pipe, antepone il BOM (U+FEFF) al primo testo."""
     conv = ConversazioneFinta(EsitoTurno("Ciao!"))
-    chat(conv, ["﻿ciao", "esci"])
+    chat(conv, ["\ufeffciao", "esci"])
     assert conv.inviati == ["ciao"]
 
     conv = ConversazioneFinta()
-    chat(conv, ["﻿esci"])
+    chat(conv, ["\ufeffesci"])
     assert conv.inviati == []
