@@ -20,7 +20,8 @@ def esegui_chat(conversazione, leggi: Callable[[str], str] = input, scrivi: Call
     try:
         while True:
             try:
-                testo = leggi("Tu> ").strip()
+                # Il BOM (U+FEFF) arriva quando PowerShell passa l'input con una pipe.
+                testo = leggi("Tu> ").lstrip("﻿").strip()
             except EOFError:
                 scrivi("")
                 return

@@ -87,3 +87,14 @@ def test_chiamate_stampate_prima_della_risposta():
     chiamata = ChiamataStrumento("ora_corrente", {"fuso_orario": "Asia/Tokyo"}, "R")
     righe = chat(ConversazioneFinta(EsitoTurno("Sono le 21.", [chiamata])), ["ore?", "esci"])
     assert righe.index(formatta_chiamata(chiamata)) < righe.index("Assistente> Sono le 21.")
+
+
+def test_bom_iniziale_ignorato():
+    """PowerShell, passando l'input con una pipe, antepone il BOM (U+FEFF) al primo testo."""
+    conv = ConversazioneFinta(EsitoTurno("Ciao!"))
+    chat(conv, ["﻿ciao", "esci"])
+    assert conv.inviati == ["ciao"]
+
+    conv = ConversazioneFinta()
+    chat(conv, ["﻿esci"])
+    assert conv.inviati == []
