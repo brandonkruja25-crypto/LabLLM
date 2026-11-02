@@ -281,7 +281,7 @@ riquadro("Se devi dirlo in 30 secondi",
          "Il flusso è un <b>grafo LangGraph</b> esplicito: un nodo chiama il modello, un nodo esegue gli strumenti, una "
          "funzione decide dove andare. Quando chiedi l'ora il modello <b>non la inventa</b>: chiede lo strumento "
          "<b>orologio</b>, il programma lo esegue davvero e il risultato torna al modello. La cronologia dura per la "
-         "sessione, si avvia anche con <b>Docker Compose</b> e ci sono <b>69 test</b> che non richiedono il modello.")
+         "sessione, si avvia anche con <b>Docker Compose</b> e ci sono <b>70 test</b> che non richiedono il modello.")
 affiancati(
     scheda("Le cinque idee da far passare", [
         "<b>Il modello è senza stato</b>: la memoria è dell'applicazione, che reinvia la cronologia a ogni turno.",
@@ -293,8 +293,8 @@ affiancati(
     scheda("Numeri da ricordare", [
         f"Modello {c('google/gemma-4-e2b')}, GGUF Q4_K_M, contesto 8192 token.",
         "Python 3.13 · LangGraph 1.2.18 · langchain-openai 1.7.3.",
-        "7 moduli, 466 righe di codice.",
-        "<b>69</b> test automatici + <b>3</b> prove reali LM Studio + <b>1</b> prova Docker.",
+        "7 moduli, 467 righe di codice.",
+        "<b>70</b> test automatici + <b>3</b> prove reali LM Studio + <b>1</b> prova Docker.",
         "Tool calling corretto: da <b>12/17</b> a <b>12/12</b> dopo aver migliorato la descrizione.",
         f"{c('MAX_PASSAGGI')} predefinito: 6 chiamate al modello per turno.",
     ], sfondo=GIALLO_CHIARO, bordo=ACCENTO),
@@ -322,9 +322,9 @@ h2("Requisiti della consegna (slide 26)")
 tabella(["Requisito", "Evidenza", "Stato"], [
     ["Grafo con LLM e cronologia", "Al secondo turno il modello ricorda «Ada» (prova reale)", "Fatto"],
     ["Strumento orologio", "Riga [strumento] in chat e log INFO di richiesta e risultato", "Fatto"],
-    ["Docker Compose", "Prova -m docker superata", "Fatto · chat con TTY da provare a mano"],
-    ["Test e documentazione", "69 automatici + prove reali; README e CLAUDE.md", "Fatto"],
-    ["Repository condivisa", "Conventional Commits in italiano", "Push da fare"],
+    ["Docker Compose", "Prova -m docker superata; chat interattiva provata a mano", "Fatto"],
+    ["Test e documentazione", "70 automatici + prove reali; README, AVVIO.md e CLAUDE.md", "Fatto"],
+    ["Repository condivisa", "Conventional Commits in italiano; push su origin/main", "Fatto"],
 ], [3.8, 8.0, 5.6])
 nuova_pagina()
 
@@ -425,9 +425,9 @@ nuova_pagina()
 h1("4 · Test, metodo e risultati")
 h2("Due livelli di verifica")
 tabella(["Livello", "Che cosa prova", "Comando · esito"], [
-    ["Test automatici (69)", "Il <b>programma</b>: percorsi del grafo, ToolMessage, limite, rollback, log, orologio con istante "
+    ["Test automatici (70)", "Il <b>programma</b>: percorsi del grafo, ToolMessage, limite, rollback, log, orologio con istante "
      "fisso (Roma inverno/estate, Tokyo, UTC, cambio di giorno), configurazione, terminale, avvio.",
-     f"{c('python -m pytest')}<br/>69 passed, 4 deselected"],
+     f"{c('python -m pytest')}<br/>70 passed, 4 deselected"],
     ["Prove reali LM Studio (3)", "Il <b>modello</b>: ricorda «Ada» al secondo turno; chiede davvero l'orologio per Tokyo e usa "
      "l'ora restituita; non usa lo strumento per una domanda ordinaria.", f"{c('python -m pytest -m lmstudio -v')}<br/>3 passed"],
     ["Prova Docker (1)", "Dal container: riga [strumento] con Asia/Tokyo e risposta che usa quell'ora.",
@@ -462,8 +462,8 @@ punti(
 )
 h2("Limiti e punti aperti (dirli prima che li chiedano)")
 punti(
-    "Chat Docker con TTY vero provata solo con input da pipe; LM Studio spento e Ctrl+C dal vivo coperti dai test ma non provati a mano.",
-    "La prova Docker non ricostruisce l'immagine: prima va fatto docker compose build. Push ancora da fare.",
+    "LM Studio spento e Ctrl+C dal vivo coperti dai test ma non provati a mano.",
+    "La prova Docker non ricostruisce l'immagine: prima va fatto docker compose build.",
 )
 nuova_pagina()
 
@@ -475,7 +475,7 @@ tabella(["Tempo", "Parte", "Messaggio chiave"], [
     ["2 min", "Tool calling", "Il modello chiede, il programma esegue; la descrizione è il contratto; tool_call_id."],
     ["1 min", "Architettura", "Moduli piccoli e separati; LM Studio sull'host, app nel container."],
     ["3 min", "Demo", "Domanda ordinaria, domanda sull'ora con riga [strumento] e log, avvio in Docker."],
-    ["2 min", "Test e metodo", "69 test senza modello, prove reali separate, TDD, Superpowers, Conventional Commits."],
+    ["2 min", "Test e metodo", "70 test senza modello, prove reali separate, TDD, Superpowers, Conventional Commits."],
     ["1 min", "Risultati e limiti", "12/17 → 12/12, giorno della settimana, ragionamento nascosto, punti aperti."],
 ], [1.5, 2.8, 13.1])
 codice("""

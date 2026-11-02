@@ -254,10 +254,10 @@ storia.append(Paragraph("Guida riassuntiva e teorica per preparare l'esposizione
 storia.append(Spacer(1, 40))
 tabella(["Dato", "Valore"], [
     ["Progetto", "<font name='Codice'>Lezione 4/assistente-laboratorio/</font>, branch <font name='Codice'>main</font>"],
-    ["Commit raggiunto", "<font name='Codice'>bbe18d9</font> · docs: completa README e CLAUDE.md dopo la verifica finale"],
+    ["Repository", "<font name='Codice'>github.com/brandonkruja25-crypto/LabLLM</font> · branch <font name='Codice'>main</font> pubblicato su origin"],
     ["Modello", "<font name='Codice'>google/gemma-4-e2b</font> (GGUF, Q4_K_M) servito da LM Studio sull'host"],
     ["Tecnologie", "Python 3.13 · LangGraph 1.2.18 · langchain-openai 1.7.3 · Docker Compose v5"],
-    ["Test", "69 automatici senza modello · 3 prove reali LM Studio · 1 prova reale Docker"],
+    ["Test", "70 automatici senza modello · 3 prove reali LM Studio · 1 prova reale Docker"],
     ["Data", "2 novembre 2026"],
 ], [4, 12.4])
 storia.append(PageBreak())
@@ -319,10 +319,10 @@ h2("Requisiti obbligatori della consegna (slide 26) e stato")
 tabella(["Requisito", "Evidenza", "Stato"], [
     ["Grafo con LLM e cronologia", "Conversazione su più turni: al secondo turno il modello ricorda «Ada»", "Fatto"],
     ["Strumento orologio", "Richiesta, esecuzione e risultato nella riga [strumento] e nei log INFO", "Fatto"],
-    ["Docker Compose", "Container collegato a LM Studio; prova -m docker superata", "Fatto (chat con TTY da confermare a mano)"],
-    ["Test", "69 automatici + prove reali con marcatori lmstudio e docker", "Fatto"],
-    ["Documentazione", "README, .env.example e CLAUDE.md coerenti", "Fatto"],
-    ["Repository condivisa", "Commit Conventional leggibili; push eseguito dallo studente", "Push da fare"],
+    ["Docker Compose", "Container collegato a LM Studio; prova -m docker superata; chat interattiva provata a mano", "Fatto"],
+    ["Test", "70 automatici + prove reali con marcatori lmstudio e docker", "Fatto"],
+    ["Documentazione", "README, .env.example e CLAUDE.md coerenti; guida all'avvio AVVIO.md", "Fatto"],
+    ["Repository condivisa", "Commit Conventional leggibili; push su origin/main", "Fatto"],
 ], [4, 8.4, 4])
 
 # 2
@@ -526,7 +526,7 @@ tabella(["Comando", "A che cosa serve"], [
 
 # 7
 h1("7. Architettura del progetto")
-p("Il codice è diviso in moduli piccoli, ciascuno con una responsabilità (466 righe in tutto). Le lezioni successive "
+p("Il codice è diviso in moduli piccoli, ciascuno con una responsabilità (467 righe in tutto). Le lezioni successive "
   "estenderanno questo codice senza ripartire da zero: per esempio, un nuovo strumento si aggiunge alla lista "
   "<font name='Codice'>strumenti</font> passata a modello e grafo.")
 storia.append(KeepTogether([diagramma_architettura(), Paragraph("Figura 3 · Moduli e dipendenze.", S["nota"])]))
@@ -662,6 +662,7 @@ tabella(["Situazione", "Comportamento (verificato)"], [
     ["Limite di passaggi", "Messaggio esplicito, nessuna risposta inventata, rollback."],
     ["Ctrl+C, fine input, esci", "Uscita pulita senza traceback, anche durante l'attesa della risposta o all'avvio (codice 130)."],
     ["Output rediretto su file (Windows)", "Nessun crash: i caratteri non codificabili diventano «?»."],
+    ["Input passato con una pipe in PowerShell", "Il BOM che PowerShell antepone al testo viene ignorato: «esci» chiude la chat."],
 ], [5.6, 10.8])
 
 # 12
@@ -694,7 +695,7 @@ tabella(["File di test", "N.", "Che cosa verifica"], [
     ["test_strumenti.py", "18", "Orologio con istante fisso: Roma inverno/estate, Tokyo, UTC, default, spazi, fusi non validi, giorno nel fuso giusto, schema inviato al modello."],
     ["test_grafo.py", "15", "Percorsi con modelli finti: solo llm; llm → strumenti → llm; limite (3 llm, 2 strumenti); strumento sconosciuto, argomenti errati o non JSON; log; instrada sui quattro casi; prompt."],
     ["test_configurazione.py", "14", "Default, variabili obbligatorie mancanti, valori non validi (MAX_PASSAGGI, LIVELLO_LOG, fuso, URL)."],
-    ["test_terminale.py", "10", "esci, righe vuote, fine input e Ctrl+C, errore del modello, risposta vuota, limite, formato della riga [strumento]."],
+    ["test_terminale.py", "11", "esci, righe vuote, fine input e Ctrl+C, errore del modello, risposta vuota, limite, formato della riga [strumento], BOM dell'input da pipe."],
     ["test_conversazione.py", "6", "Due turni senza duplicati; rollback dopo errore di connessione e HTTP; chiamate del turno; rollback al limite."],
     ["test_modello.py", "3", "Verifica del modello: presente, assente con elenco, server irraggiungibile con avviso."],
     ["test_avvio.py", "3", "Configurazione mancante senza traceback; Ctrl+C all'avvio; output non codificabile."],
@@ -718,7 +719,7 @@ riquadro("Perché servono anche le prove reali",
          "che il <i>programma</i> gestisce correttamente richieste e risposte; solo la prova con il modello reale prova "
          "che <i>gemma-4-e2b</i> chiede davvero lo strumento con gli argomenti giusti.", sfondo=GIALLO_CHIARO, bordo=ACCENTO)
 codice("""
-python -m pytest                    # 69 passed, 4 deselected
+python -m pytest                    # 70 passed, 4 deselected
 python -m pytest -m lmstudio -v     # 3 passed (richiede .env e LM Studio attivo)
 docker compose build
 python -m pytest -m docker -v       # 1 passed (richiede Docker e LM Studio)
@@ -738,7 +739,7 @@ tabella(["Fase", "Che cosa è stato prodotto"], [
     ["Piano", "Cinque incrementi con file, interfacce, test da scrivere prima e verifiche attese: grafo fisso, LM Studio e cronologia, orologio e instradamento, Docker, verifica completa."],
     ["Implementazione", "Esecuzione del piano in linea con TDD, un commit per incremento verificato, registro delle decisioni."],
     ["Review e verifica", "Revisione indipendente di tutto il lavoro: nessun problema critico; corretti 5 problemi importanti, ognuno partendo da un test che falliva."],
-    ["Integrazione", "README e CLAUDE.md aggiornati, handoff per riprendere il lavoro, push lasciato allo studente."],
+    ["Integrazione", "README e CLAUDE.md aggiornati, guida all'avvio, handoff per riprendere il lavoro, push su richiesta dello studente."],
 ], [3.2, 13.2])
 h2("Commit (Conventional Commits)")
 tabella(["Commit", "Messaggio"], [
@@ -756,6 +757,12 @@ tabella(["Commit", "Messaggio"], [
     ["865945d", "test(docker): verifica che la risposta dal container usi l'ora restituita dallo strumento"],
     ["fe0085e", "feat(strumenti): aggiungi il giorno della settimana al risultato dell'orologio"],
     ["bbe18d9", "docs: completa README e CLAUDE.md dopo la verifica finale"],
+    ["a188fc8", "docs(esposizione): aggiungi la guida PDF per l'esposizione e lo script che la genera"],
+    ["edd9583", "fix(terminale): ignora il BOM che PowerShell antepone all'input passato con una pipe"],
+    ["f47ef87", "docs: aggiungi la guida passo per passo per avviare l'assistente"],
+    ["30c21a4", "docs(esposizione): aggiungi il promemoria di 5 pagine e lo script che lo genera"],
+    ["6894673", "docs: togli dal README la nota sulla chat Docker interattiva, ora verificata"],
+    ["b5b0db4", "style(terminale): scrivi il BOM come sequenza \\ufeff invece del carattere invisibile"],
 ], [2.2, 14.2])
 
 # 15
@@ -797,13 +804,11 @@ p("Esito: «pronto con correzioni», nessun problema critico, i cinque punti del
 # 16
 h1("16. Limiti, problemi aperti e prossimi passi")
 tabella(["Punto aperto", "Stato"], [
-    ["Chat Docker con TTY vero (comando della slide 17 digitando a mano)", "Provata solo con input da pipe; da confermare in un terminale interattivo."],
     ["LM Studio spento davvero", "Simulato con una porta chiusa; comportamento coperto anche dai test."],
     ["Ctrl+C in una chat interattiva", "Coperto dai test automatici, non provato dal vivo."],
     ["La prova Docker non ricostruisce l'immagine", "Eseguire prima docker compose build (scritto in CLAUDE.md)."],
     ["Risposta del modello fatta di soli spazi", "Stampa Assistente&gt; vuoto invece del testo previsto (minore)."],
     ["Tempi di risposta", "Dominati dal ragionamento nascosto del modello; possibile ottimizzazione da decidere."],
-    ["Push", "Da eseguire dallo studente."],
 ], [7.2, 9.2])
 h2("Prossime lezioni")
 p("Il progetto è la base delle lezioni successive: altri strumenti, MCP, workflow e RAG estenderanno questo codice e "
@@ -820,7 +825,7 @@ tabella(["Tempo", "Parte", "Messaggio chiave"], [
     ["2 min", "Teoria tool calling", "Il modello chiede, il programma esegue; la descrizione è il contratto; tool_call_id."],
     ["1 min", "Architettura", "Moduli piccoli e separati (Figura 3); LM Studio sull'host (Figura 2)."],
     ["3 min", "Demo", "Domanda ordinaria, domanda sull'ora con riga [strumento], log INFO, avvio in Docker."],
-    ["2 min", "Test e metodo", "69 test senza modello, prove reali separate, TDD, Superpowers, Conventional Commits."],
+    ["2 min", "Test e metodo", "70 test senza modello, prove reali separate, TDD, Superpowers, Conventional Commits."],
     ["1 min", "Risultati e limiti", "12/17 → 12/12, giorno della settimana, tempi e ragionamento nascosto, punti aperti."],
 ], [1.6, 3.2, 11.6])
 h2("Script della demo")
