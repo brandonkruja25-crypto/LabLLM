@@ -146,10 +146,6 @@ riga `[strumento]`. Richiede Docker, il file `.env` e LM Studio attivo.
 python -m pytest -m docker -v
 ```
 
-> Verifica: build, `docker ps`, `docker logs -f` e la prova `-m docker` sono stati eseguiti con
-> esito positivo. La chat interattiva con TTY (`docker compose run --rm --name assistente-demo
-> assistente` digitando a mano) è ancora da confermare in un terminale interattivo.
-
 ### Diagnosi
 
 | Sintomo | Cause probabili | Cosa controllare |
